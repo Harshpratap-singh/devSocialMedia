@@ -1,15 +1,28 @@
 const express = require("express");
+const connectDB = require("./config/database");
 const app = new express();
-app.use("/",(req,res)=>{
-    res.send("hello from the sever")
-});
-app.use("/test",(req,res)=>{
-    res.send("hello from the sever test")
-});
-app.use("/home",(req,res)=>{
-    res.send("hello1234 from the sever home")
+const { adminAuth, userAuth } = require("./middlewares/auth");
+const UserModel = require("./models/user");
+
+app.use(express.json());
+
+app.post("/signup", async (req, res) => {
+  const user = new UserModel(req.body);
+  try {
+    await user.save();
+    res.send("user added sucessfully");
+  } catch (error) {
+    res.status(400).send("error while saving data" + error.message);
+  }
 });
 
-app.listen(3000, () => {
-  console.log("we are now starting");
-});
+connectDB()
+  .then(() => {
+    console.log("DB connection sucessfull");
+    app.listen(3000, () => {
+      console.log("we are now starting");
+    });
+  })
+  .catch(() => {
+    console.log("Error while connecting to db");
+  });
